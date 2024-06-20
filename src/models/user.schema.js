@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import AuthRoles from "../utls/authRoles.js"
 import bcrypt from "bcryptjs"
+import JWT from "jsonwebtoken";
+import config from "../config/index.js";
+import crypto from "crypto"
 
 const userSchema = mongoose.Schema({
 
@@ -44,7 +47,37 @@ userSchema.methods = {
      
     comparePassword : async function(enteredPassword){
         return await bcrypt.compare(enteredPassword,this.password)
+    },
+    
+    // how to generate token mtlb password vegra sahi h token denge ki 
+    // u can now rome around the websitegenerate JWT token
+
+    getJWTtoken : function(){
+        JWT.sign({_id: this._id} , config.JWT_SECRET,{
+            expiresIn : config.JWT_EXPIRY
+        })
+    },
+
+    //generate forgot password token
+    generateForgotPassword: function(){
+       const forgotToken = crypto.randomBytes(20).toString("hex")
+       
+       // encrypt the token
+       this.forgotPasswordToken = crypto
+       .createHash("sha256")
+       .update(forgotToken)
+       .digest("hex")
+       
+       // time for token to expire
+       this.forgotPasswordExpiry = Date.now() + 20 * 60 * 1000
+
+       return forgotToken
     }
 }
+
+
+
+
+
 
 export default mongoose.model("User",userSchema)
