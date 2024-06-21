@@ -9,16 +9,17 @@
 // res comming from server 
 // next is middleware
 
-const asyncHandler = (fn) => async (req,res,next) => {
-       try {
+const asyncHandler = (fn) => async(req,res,next) => {
+        try {
             await fn(req,res,next)
-       } catch (error) {
-             res.status(error.code|| 500).json({
-                sucess : false,
-                message : error.message
-             })            
-       }
-}   
+        } catch (error) {
+            res.status(erro.code || 500).json({
+                success : false,
+                message :error.message
+            })
+            
+        }
+}
 
 
 export default asyncHandler;
