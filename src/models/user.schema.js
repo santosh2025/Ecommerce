@@ -5,7 +5,7 @@ import JWT from "jsonwebtoken";
 import config from "../config/index.js";
 import crypto from "crypto"
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
 
     name : {
         type : String ,
@@ -32,7 +32,7 @@ const userSchema = mongoose.Schema({
     forgotPasswordExpiry : Date
 } , {timestamps : true})
 
-// Encrypt the password before saving
+// Encrypt the password before saving : HOOKS
 
 userSchema.pre("save", async function(next){
     // next is kind of middleware or say flag that i stop something 

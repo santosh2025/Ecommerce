@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 
 
 const productSchema = new mongoose.Schema({
-   name :{
-    type : String,
-    required : ["true" , " please provide a product name"],
-    trim = true,
-    maxLength : [120 , "product name should not be max than 120"]
+    name : {
+        type : String,
+        required : ["true" , " please provide a product name"],
+        trim : true,
+        maxLength : [120 , "product name should not be max than 120"]
    },
     price : {
         type : Number,
@@ -33,6 +33,7 @@ const productSchema = new mongoose.Schema({
         default : 0
     },
     collectionId :{
+         type : mongoose.Schema.Types.ObjectId,
          ref : "Collection"
     }
 },
