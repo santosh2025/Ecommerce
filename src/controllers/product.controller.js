@@ -5,6 +5,7 @@ import mongoose, { Mongoose } from "mongoose"
 import asynHandler from "../service/asyncHandler.js"
 import CustomError from "../utls/CustomError.js"
 import config from "../config/index.js"
+import fs from "fs"
 
 /*************************************************************
  * @ADD_PRODUCT
@@ -14,7 +15,7 @@ import config from "../config/index.js"
  * @description Users AWS S3 Bucket for image upload
  * @returns Product Object
  *************************************************************/
-
+// uploading a file 
 
 export const addProduct = asynHandler(async(req,res)=>{
 
@@ -28,11 +29,131 @@ export const addProduct = asynHandler(async(req,res)=>{
          let productId = new Mongoose.Types.ObjectId().toHexString()
       
         console.log(fields,files);
-
         
+        if(!fields.name || !fields.price || !fields.description || !fields.collectionID){
+            throw new CustomError("please fill all the fields" , 500)
+        }
+
+        let imgArrayResp = Promise.all(
+            Object.keys(files).map(async(file,index) => {
+                const element = file[fileKey]
+                console.log(element);
+                const data = fs.readFileSync(element.filepath)
+
+                const upload = await s3Fileupload({
+                    bucketName:config.S3_BUCKET_NAME,
+                    key : 'products/${productId}/photo_${index+1}.png',
+                    body : data,
+                    contentType : element.mimetype
+                })
+
+                // productId = 123abc456
+                // 1: products/123abc456/photo_1.png
+                // 2: products/123abc456/photo_2.png
+                
+                console.log(upload);
+                
+                return {
+                    secure_url : upload.Location
+                }
+
+
+            })
+        )
+
+        let imgArray = await imgArrayResp
+
+        const product =  await Product.create({
+            _id:productId,
+            photos : imgArray,
+            ...fields
+        })
+
+        if(!product){
+            throw new CustomError("Product failed to be created in DB" , 400)
+        }
+
+        res.status(200).json({
+           success : true,
+           product,
+        })  
     })
-     
+})
+
+export const getAllProducts = asynHandler(async(req,res) => {
+    
+    const products = await Product.find({})
 
 
+    if(!products){
+        throw new CustomError("No Products found" , 404)
+    }
+
+    res.status(200).json({
+        success : true,
+        products,
+    })
+})
+
+export const getProductById = asynHandler(async(req,res) => {
+
+    const {id : productId} = req.params 
+
+    const product = await Product.findById({productId});
+
+
+    if(!product){
+        throw new CustomError("product not found", 404)
+    }
+
+    res.status(200).json({
+        success : true,
+        product
+    })
+})
+
+export const getProductByCollectionId = asynHandler(async(req,res) => {
+   const {id : collectionId} = req.params
+
+   const products = await Product.findById({collectionId})
+
+   if(!products){
+    throw new CustomError("No products found",404)
+   }
+
+   res.status(200).json({
+     success : true,
+     products
+   })
 
 })
+
+export const deleteProduct = asynHandler(async(req,res) => {
+    const {id: productId} = req.params
+
+    const product = await Product.findById({productId})
+
+    if(!product){
+        throw new CustomError("Product to be deleted not found" , 404)
+    }
+    
+   const deletePhotos = Promise.all(
+        product.photos.map(async(element,index) =>{
+            await s3deleteFile({
+                bucketName : config,S3_BUCKET_NAME,
+                key : 'products/${productId._id.toString()}/photo_${index+1}.png'
+            })
+        })
+    )
+    await deletePhotos;
+
+    await Product.remove({productId})
+
+
+    res.status(200).json({
+        succes : true,
+        message : "Product is been deleted successfull"
+    })
+})
+
+ex
