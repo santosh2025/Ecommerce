@@ -50,7 +50,7 @@ userSchema.methods = {
     },
     
     // how to generate token mtlb password vegra sahi h token denge ki 
-    // u can now rome around the websitegenerate JWT token
+    // u can now rome around the website generate JWT token
 
     getJWTtoken : function(){
         JWT.sign({_id: this._id , role : this.role} , config.JWT_SECRET,{
@@ -59,7 +59,7 @@ userSchema.methods = {
     },
 
     //generate forgot password token
-    generateForgotPassword: function(){
+    generateForgotPasswordToken: function(){
        const forgotToken = crypto.randomBytes(20).toString("hex")
        
        // encrypt the token
