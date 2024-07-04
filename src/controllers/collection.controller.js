@@ -48,7 +48,7 @@ export const updateCollection = asyncHandler(async(req,res)=>{
     })
 })
 
-export const delettCollection = asyncHandler(async(req,res)=>{
+export const deleteCollection = asyncHandler(async(req,res)=>{
     const {id: collectionId} = req.params
     // req.params means we are geting it from routes or u can say urls
    

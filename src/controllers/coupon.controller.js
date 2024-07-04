@@ -3,7 +3,15 @@ import asyncHandler from "../service/asyncHandler.js"
 import CustomError from "../utls/CustomError.js"
 
 
-export const addCoupon = asyncHandler(async(req,res) => {
+/****************************************************************************
+ * @CREATE_COUPON
+ * @route https://localhost:5000/api/coupon
+ * @description Controller used for creating a new coupon
+ * @description Only admin and Moderator can create the coupon
+ * @return Coupons Object with success message "Coupon Created SuccessFully"
+ ****************************************************************************/
+
+export const createCoupon = asyncHandler(async(req,res) => {
      
     const {code , discount}  = req.body
    
@@ -40,7 +48,7 @@ export const deleteCoupon = asyncHandler(async(req,res) => {
         throw CustomError("Please provide the coupon id" , 404)
     }
     
-    const couponExist = await Coupons.findById({couponId})
+    const couponExist = await Coupons.findById(couponId)
 
     if(!couponExist){
         throw CustomError("Coupon does not exist with the provided id" , 404)
@@ -100,4 +108,26 @@ export const disableCoupon = asyncHandler(async(req,res) => {
      success :  true,
      message :  " Coupon disabled successfully"
    })
+})
+
+export const updateCoupon = asyncHandler(async(req,res)=>{
+    const {id : couponId} = req.params
+    const {action} = req.body
+
+    const coupon = await Coupons.findOneAndUpdate(couponId,{
+        active : action
+    },{
+        new : true,
+        runValidators : true
+    })
+
+    if(!coupon){
+        throw new CustomError("Coupons not found ", 404)
+    }
+
+    res.status(200).json({
+        success : true,
+        message : "Coupon updated successfully",
+        coupon
+    })
 })
