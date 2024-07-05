@@ -35,6 +35,10 @@ const productSchema = new mongoose.Schema({
     collectionId :{
          type : mongoose.Schema.Types.ObjectId,
          ref : "Collection"
+    },
+    favourites:{
+        type : Boolean,
+        default : false
     }
 },
 {timestamps: true})

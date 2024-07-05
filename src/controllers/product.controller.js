@@ -6,6 +6,7 @@ import asynHandler from "../service/asyncHandler.js"
 import CustomError from "../utls/CustomError.js"
 import config from "../config/index.js"
 import fs from "fs"
+import asyncHandler from "../service/asyncHandler.js"
 
 /*************************************************************
  * @ADD_PRODUCT
@@ -156,4 +157,43 @@ export const deleteProduct = asynHandler(async(req,res) => {
     })
 })
 
-ex
+export const addfavourite = asynHandler(async(req,res) => {
+    
+    const {id : collectionId} = req.params
+
+    const product = await Product.findById(collectionId)
+   
+    if(!product){
+        throw new CustomError("Product now found",400)
+    }
+
+    product.favourites = !product.favourites
+
+    product.save()
+
+    res.status(200).json({
+        success : true,
+        message : "Favourite product is added"
+    })
+})
+
+export const searchProduct = asyncHandler(async(req,res) => {
+    
+    const {name} = req.body
+
+    if(!name){
+        throw new CustomError("Product name is required",400)
+    }
+
+    const products =  await Product.find({name:{$regex : name , $options : "i"}})
+    
+    if(!products){
+        throw new CustomError("No product found",400)
+    }
+
+    res.status(200).json({
+        sucess:true,
+        products
+    })
+    
+})
