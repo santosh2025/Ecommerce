@@ -3,8 +3,9 @@ import asyncHandler from "../service/asyncHandler.js"
 import CustomError from "../utls/CustomError"
 import Coupon from "../models/coupon.schema.js"
 import Order from "../models/order.schema.js"
-import Razorpay from "../config/rozorpay.config.js"
 import razorpay from "../config/rozorpay.config.js"
+import verifyPayment from "../utls/verify.payment.js"
+import orderstatus from "../utls/order.status.js"
 
 export const generateRazorpayOrderId = asyncHandler(async(req,res)=>{
    
@@ -67,10 +68,9 @@ export const generateRazorpayOrderId = asyncHandler(async(req,res)=>{
     })
 })
 
-// todo :  add order in database and update product stock , krna h
-export const generateOrder = asyncHandler(async(req,res) =>{
+export const placeOrder = asyncHandler(async(req,res) =>{
    
-   const {transactionId , product , Coupon , coupon , amount , phoneNumber ,address} = req.body
+   const {transactionId , product , user , coupon , amount , phoneNumber ,address , razorpay_signature , razorpay_payment_id} = req.body
 
    const order = await Order.create({
       transactionId , coupon , phoneNumber , user,product,amount , address
@@ -95,21 +95,87 @@ export const generateOrder = asyncHandler(async(req,res) =>{
        productFromDB.save();
        
    })) 
-   
+
+   await updateProducts;
+
+   const paymentData = {
+        razorpay_signature,
+        razorpay_payment_id,
+        transactionId
+    }
+
+    const check = await verifyPayment(paymentData)
+
+    if(!check){
+        throw new CustomError("Payment verification failed", 400)
+    }
+
+    res.status(200).json({
+        success : true,
+        message : "ORDER PLACED SUCCESSFULLY",
+        order,
+        payment : true
+    })
 
 })
 
-// todo : get only my order , krna abhi
 export const getMyOrders = asyncHandler(async(req,res) =>{
-    //
+    
+    const {id : user} = req.params
+
+    if(!user){
+        throw new CustomError("Provided orderId" , 400)
+    }
+    
+    const orders =  await Order.findById(user)
+   
+    if(!orders){
+        throw new CustomError("No order found!" , 404)
+    }
+
+    res.status(200).json({
+        success : true,
+        orders
+    })
 })
 
-// todo : get only my order :ADMIN , krna abhi
 export const getAllOrders = asyncHandler(async(req,res) =>{
-    //
+     const orders = Order.find({})
+
+     if(!orders){
+        throw new CustomError("No order found!")
+     }
+
+     res.status(200).json({
+        success:true,
+        orders
+     })
 })
 
-//todo update order status: ADMIN
 export const updateOrderStatus = asyncHandler(async(req,res) =>{
-    //
+     const {id : orderId} = req.params
+     const {status} = req.body
+
+     if(!status){
+        throw new CustomError("Order status required",400)
+     }
+
+     if(!orderstatus[status]){
+        throw new CustomError("Invalid status",400)
+     }
+
+     const order = await Order.findOneAndUpdate(orderId , {status} ,{
+         new : true,
+         runValidators : true
+     })
+
+     if(!order){
+        throw new CustomError("No order found",400)
+     }
+
+     res.status(200).json({
+        success : true,
+        message : "STATUS UPDATED SUCCESSFULLY",
+        order
+     })
 })

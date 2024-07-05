@@ -1,4 +1,5 @@
 import mongoose, { mongo } from "mongoose";
+import orderStatus from "../utls/order.status"
 
 
 const orderSchema = new mongoose.Schema({
@@ -36,7 +37,7 @@ const orderSchema = new mongoose.Schema({
     transactionId : String,
     status :{
         type : String,
-        enum : config.STATUS,
+        enum : orderStatus.ORDERED,
     }
 },{timestamps : true})
 
