@@ -4,6 +4,9 @@ import asyncHandler from "../service/asyncHandler";
 import CustomError from "../utls/CustomError";
 import User from "../models/user.schema.js"
 import mailHelper from "../utls/mailHelper.js"
+import generateOTP from "../utls/generateOtp.js";
+import { Twilio } from "twilio";
+import twilioSMS from "../utls/sendSMS.twilio.js";
 
 export const cookieOptions = {
     expires : new Date(Date.now()+ 3 * 24 * 60 * 60 * 1000), 
@@ -162,7 +165,7 @@ export const forgotPassword = asyncHandler(async(req,res) => {
       }
 })
 
-export  const resetPassword = asyncHandler(async(req,res) =>{
+export const resetPassword = asyncHandler(async(req,res) =>{
     
    const {token :resetToken} = req.params
    const {password , confirmPassowrd} = req.body
@@ -204,3 +207,39 @@ export  const resetPassword = asyncHandler(async(req,res) =>{
     })
 
 })
+
+export const sendOTP = asyncHandler(async(req,res) =>{
+    
+    const {phoneNumber} = req.body
+
+    const checkUser = await User.findOne({phoneNumber})
+
+    if(!checkUser){
+       throw new CustomError("User not found" , 400)
+    }
+    
+    if(!phoneNumber){
+      throw new CustomError("PhoneNumber is required", 400)
+    }
+
+    const generatedOTP = await generateOTP(8);
+    
+    const options = {
+        to : phoneNumber,
+        body : 'Here is your OTP : ${generatedOTP}' ,
+    };
+
+    await twilioSMS(options)
+
+   const user = await User.findByIdAndUpdate({phoneNumber} ,{mobileOtp : generatedOTP} , {
+         new : true,
+         runValidators : true
+    })
+    
+    res.status(200).json({
+       success : true,
+       message : "OTP was sent successfully"
+    })
+})
+
+

@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs"
 import JWT from "jsonwebtoken";
 import config from "../config/index.js";
 import crypto from "crypto"
+import FlexApiBase from "twilio/lib/rest/FlexApiBase.js";
 
 const userSchema = new mongoose.Schema({
 
@@ -27,6 +28,18 @@ const userSchema = new mongoose.Schema({
         enum : Object.values(AuthRoles),
         default : AuthRoles.USER
     },
+    phoneNumber :{
+        type : String,
+        required : False
+    },
+    address :[{
+        type : string 
+    }],
+    profileimage:{
+        type : String,
+        required : false
+    },
+    mobileOtp : String,
     // for forget password add these two  
     forgotPasswordToken : String ,
     forgotPasswordExpiry : Date

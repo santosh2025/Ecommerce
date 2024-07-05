@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.3",
     "nodemailer": "^6.9.14",
-    "razorpay": "^2.9.4"
+    "razorpay": "^2.9.4",
+    "twilio": "^5.2.2"
   }
 }
