@@ -31,3 +31,8 @@ export default app;
 
 // how to access login roue
 // http://localhost:4000/api/v1/auth/login
+
+// var corsOptions = {
+    //     origin : "https://example.com',
+    //     optionsSuccessStatus : 200
+    // }
