@@ -242,4 +242,68 @@ export const sendOTP = asyncHandler(async(req,res) =>{
     })
 })
 
+export const loginWithPhoneNumber = asyncHandler(async(req,res) =>{
+      
+    const {phoneNumber,otp} = req.body
+
+    if(!phoneNumber || !otp){
+      throw new CustomError("PhoneNumber and OTP both required",400)
+    }
+
+    const user = await User.findOne({phoneNumber})
+
+    if(!user){
+      throw new CustomError("User not found" ,400)
+    }
+
+    if(user.length > 1){
+       throw new CustomError("Multiple user found with same phoneNumber",400)
+    }
+
+    if(user.mobileOtp === otp){
+       user.mobileOtp = undefined
+       const token = User.getJWTtoken();
+       res.cookie("token",token,cookieOptions)
+
+       res.status(200).json({
+          success : true,
+          message : "OTP VERIFIED",
+          token,
+          user
+       })
+    }else{
+       res.status(400).json({
+        success : false,
+        message : "INVAILD OTP"
+       })
+    }
+})
+
+export const updateUserAddress = asyncHandler(async(req,res) => {
+    const {user : userinfo} = req
+    const {address : Address} = req.body
+
+    if(!userinfo){
+      throw new CustomError("No user found",400)
+    }
+
+   const user =  User.findByIdAndUpdate({userinfo._id} , {address},{
+      new : true,
+      runValidators : true
+    })
+
+    if(!user){
+      throw new CustomError("User info could not be changed",400)
+    }
+
+    res.status(200).json({
+      success : true,
+      message : "User address is updated successfully"
+    })
+})
+
+// export const updateUserRole = asyncHandler(async(req, res) =>{
+//     const {}
+
+// })
 
