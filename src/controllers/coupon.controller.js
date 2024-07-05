@@ -1,4 +1,4 @@
-import Coupons from "../models/coupon.schema.js"
+import Coupon from "../models/coupon.schema.js"
 import asyncHandler from "../service/asyncHandler.js"
 import CustomError from "../utls/CustomError.js"
 
@@ -19,13 +19,13 @@ export const createCoupon = asyncHandler(async(req,res) => {
         throw new CustomError("Both code and discout required" , 404)
     } 
 
-    const isExist = await Coupons.findOne({code})
+    const isExist = await Coupon.findOne({code})
 
     if(isExist){
         throw new CustomError("Coupon already exists")
     }
     
-    const coupon = await Coupons.create({
+    const coupon = await Coupon.create({
         code,
         discount
     })
@@ -48,13 +48,13 @@ export const deleteCoupon = asyncHandler(async(req,res) => {
         throw CustomError("Please provide the coupon id" , 404)
     }
     
-    const couponExist = await Coupons.findById(couponId)
+    const couponExist = await Coupon.findById(couponId)
 
     if(!couponExist){
         throw CustomError("Coupon does not exist with the provided id" , 404)
     }
 
-    Coupons.findByIdAndDelete(couponId)
+    Coupon.findByIdAndDelete(couponId)
 
     res.status(200).json({
         success : true,
@@ -65,7 +65,7 @@ export const deleteCoupon = asyncHandler(async(req,res) => {
 
 export const getAllCoupons = asyncHandler(async(req,res) => {
 
-    const coupons = await Coupons.find()
+    const coupons = await Coupon.find()
 
     if(!coupons){
         throw new CustomError("Coupons does not found " , 404)
@@ -79,7 +79,7 @@ export const getAllCoupons = asyncHandler(async(req,res) => {
 
 export const getAllActiveCoupons = asyncHandler(async(req,res) => {
    
-     const activeCoupons = await Coupons.find({active : true})
+     const activeCoupons = await Coupon.find({active : true})
 
      if(!activeCoupons){
         throw new CustomError("No Active Coupons" , 404)
@@ -94,7 +94,7 @@ export const getAllActiveCoupons = asyncHandler(async(req,res) => {
 export const disableCoupon = asyncHandler(async(req,res) => {
    
     const {id : couponId} = req.params
-    const coupounExist = await Coupons.findById(couponId)
+    const coupounExist = await Coupon.findById(couponId)
 
     if(!coupounExist){
         throw new CustomError("Coupon does not exist" ,404)
@@ -114,7 +114,7 @@ export const updateCoupon = asyncHandler(async(req,res)=>{
     const {id : couponId} = req.params
     const {action} = req.body
 
-    const coupon = await Coupons.findOneAndUpdate(couponId,{
+    const coupon = await Coupon.findOneAndUpdate(couponId,{
         active : action
     },{
         new : true,
@@ -132,3 +132,25 @@ export const updateCoupon = asyncHandler(async(req,res)=>{
     })
 })
 
+export const updateCouponDiscount = asyncHandler(async(req,res)=>{
+  
+    const {id : couponId} = req.params
+    const {discount} = req.body
+    
+    console.log(discount)
+
+    const coupon = await Coupon.findByIdAndUpdate(couponId,{discount},{
+        new : true,
+        runValidators : true
+    })
+
+    if(!coupon){
+        throw new CustomError("Coupon not found",400)
+    }
+    coupon.save();
+
+    res.status(200).json({
+        success: true,
+        message : "Discount updated successfully"
+    })
+})
