@@ -19,7 +19,7 @@ Welcome to the Node.js E-commerce backent WebApp - your all-in-one solution for 
 3. Set up your MongoDB database.
 4. Configure your email and OTP services.
 5. Run the app: `npm start`.
-6. Access it at `http://localhost:3000`.
+6. Access it at `http://localhost:5000`.
 
 ## Usage
 
