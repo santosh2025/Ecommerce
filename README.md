@@ -1,6 +1,6 @@
-# Ecommerce# E-Commerce
+# Ecommerce-backend
 
-Welcome to the Node.js E-commerce App - your all-in-one solution for online shopping. Features include user authentication, a coupon system, product and order management, email services, OTP verification, and MongoDB integration.
+Welcome to the Node.js E-commerce backent WebApp - your all-in-one solution for online shopping. Features include user authentication, a coupon system, product and order management, email services, OTP verification, and MongoDB integration.
 
 ## Features
 
@@ -29,5 +29,3 @@ Welcome to the Node.js E-commerce App - your all-in-one solution for online shop
 - Leverage email services for communication.
 - Use OTP verification for enhanced security.
 
-
-Elevate your online shopping experience with our Node.js E-commerce App. Happy Coding!
